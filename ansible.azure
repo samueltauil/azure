@@ -19,7 +19,7 @@ deployment_type=openshift-enterprise
 openshift_master_default_subdomain=apps.devday.ocpcloud.com
 osm_default_node_selector="region=primary"
 openshift_hosted_router_selector='region=infra,zone=router'
-openshift_registry_selector='zone=registry’
+openshift_registry_selector='zone=registry'
 openshift_master_api_port=443
 openshift_master_console_port=443
 
@@ -73,8 +73,8 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 [nodes]
 10.0.0.5 openshift_node_labels="{'region': 'infra', 'zone': 'default'}"  openshift_scheduleable=false openshift_public_hostname=master.devday.ocpcloud.com
 10.0.0.6 openshift_node_labels="{'region': 'infra', 'zone': 'router'}" openshift_schedulable=True
-10.0.0.7 openshift_node_labels="{'region': 'infra', 'zone': 'router’,'zone': ‘registry’}” openshift_schedulable=True
+10.0.0.7 openshift_node_labels="{'region': 'infra', 'zone': 'router','zone': 'registry'}” openshift_schedulable=True
 10.0.0.8 openshift_node_labels="{'region': 'primary', 'zone': 'east'}" 
 10.0.0.9 openshift_node_labels="{'region': 'primary', 'zone': 'west'}" 
-10.0.0.10 openshift_node_labels="{'region': 'primary', 'zone': ‘north’}”
-10.0.0.11 openshift_node_labels="{'region': 'primary', 'zone': ‘south’}”
+10.0.0.10 openshift_node_labels="{'region': 'primary', 'zone': 'north'}”
+10.0.0.11 openshift_node_labels="{'region': 'primary', 'zone': 'south'}”
