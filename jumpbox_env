@@ -1,0 +1,5 @@
+export publicIPName="samuel-jump-server-ip"
+export nicName="samuel-jump-server323"
+export vmName="samuel-jump-server"
+export vmSize="Standard_DS1_V2"
+

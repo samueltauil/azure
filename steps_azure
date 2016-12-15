@@ -1,0 +1,104 @@
+azure provider register --subscription Pay-As-You-Go Microsoft.Network
+azure provider register --subscription Pay-As-You-Go Microsoft.Storage
+azure provider register --subscription Pay-As-You-Go Microsoft.Compute
+
+source ./env_variables
+source ./jumpbox_env
+
+source ./createNetworkSecurityGroup.sh
+
+azure network nsg show --resource-group $resourceGroupName \
+      --name $networkSecurityGroup
+
+source ./createNetworkAndSubnet.sh
+
+azure storage account create $storageAccountName --resource-group $resourceGroupName --sku-name LRS --kind Storage --location $location
+
+azure storage account show $storageAccountName --resource-group $resourceGroupName
+
+subnetId="$(azure network vnet subnet show --resource-group $resourceGroupName \
+                --vnet-name $vnetName \
+                --name $subnetName|grep Id)"
+
+subnetId=${subnetId#*/}
+
+echo $subnetId
+
+azure network public-ip create --resource-group $resourceGroupName \
+    --name $publicIPName \
+    --location $location \
+    --allocation-method Static
+
+azure network nic create --name $nicName \
+    --resource-group $resourceGroupName \
+    --location $location \
+    --subnet-id $subnetId \
+    --network-security-group-name $networkSecurityGroup \
+    --public-ip-name $publicIPName
+
+azure vm create --resource-group $resourceGroupName \
+    --name $vmName \
+    --location $location \
+    --vm-size $vmSize \
+    --subnet-id $subnetId \
+    --nic-names $nicName \
+    --os-type linux \
+    --image-urn RHEL \
+    --storage-account-name $storageAccountName \
+    --admin-username samuel \
+    --admin-password openshift \
+    --disable-boot-diagnostics
+
+azure network public-ip show --name $publicIPName --resource-group $resourceGroupName
+ssh <<youradminusername>>@<<jumpserverip>>
+sudo bash
+
+===== OPTIONAL =========
+azure vm create --resource-group $resourceGroupName \
+    --name $vmName \
+    --location $location \
+    --vm-size $vmSize \
+    --subnet-id $subnetId \
+    --nic-names $nicName \
+    --os-type linux \
+    --image-urn RHEL \
+    --storage-account-name $storageAccountName \
+    --admin-username $adminUserName \
+    --ssh-publickey-file ~/.ssh/azure_ose.pub \
+    --disable-boot-diagnostics
+=========================
+
+
+RUN ON JUMP BOX
+---------------
+
+yum install -y gcc-c++ make
+curl -sL https://rpm.nodesource.com/setup_6.x | sudo -E bash -
+yum install nodejs
+node -v
+npm -v
+npm install -g azure-cli
+
+subscription-manager register 
+subscription-manager list --available
+subscription-manager attach --pool=poolid
+subscription-manager repos --disable="*"
+subscription-manager repos \
+    --enable="rhel-7-server-rpms" \
+    --enable="rhel-7-server-extras-rpms" \
+    --enable="rhel-7-server-ose-3.3-rpms"
+
+yum install -y atomic-openshift-utils
+
+ssh-keygen
+
+yum install git -y
+
+git clone https://github.com/samueltauil/openshift-on-azure
+cd openshift-on-azure/manageVMs
+
+#change pass
+
+source ./addAzureHosts.sh
+
+azure vm list-ip-address --resource-group $resourceGroupName
